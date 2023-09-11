@@ -106,7 +106,7 @@ void PHITS2TH2D()
         ymax = ymin;
         ymin = temp;
     }
-    int ny = (int)((ymax - ymin) / ystep);
+    int ny = (int)(((ymax + ystep / 2.) - (ymin - ystep / 2.)) / ystep);
 
     double xmin = stod(lineSeparated[11]);
     double xmax = stod(lineSeparated[13]);
@@ -117,14 +117,14 @@ void PHITS2TH2D()
         xmax = xmin;
         xmin = temp;
     }
-    int nx = (int)((xmax - xmin) / xstep);
+    int nx = (int)(((xmax + xstep / 2.) - (xmin - xstep / 2.)) / xstep);
 
     cout << "ny = " << ny << ", nx = " << nx << endl;
 
     int totalDataNum = ny * nx;
     int totalLineNum = (int)(totalDataNum / 10); // PHITS output has 10 data in a single line.
 
-    outTH2D = new TH2D("outHist", "outHist", nx, xmin, xmax, ny, ymin, ymax);
+    outTH2D = new TH2D("outHist", "outHist", nx, xmin - xstep / 2., xmax + xstep / 2., ny, ymin - ystep / 2., ymax + ystep / 2.);
 
     int numDataCount = 0;
     double data[totalDataNum];
@@ -139,7 +139,7 @@ void PHITS2TH2D()
             double datum;
             if (iss >> datum)
             {
-                cout << datum << ", ";
+                // cout << datum << ", ";
 
                 data[numDataCount] = datum;
                 numDataCount++;
@@ -148,15 +148,15 @@ void PHITS2TH2D()
     }
 
     numDataCount = 0;
-    for (int i = 0; i < ny; i++)
+    for (int i = ny; i > 0; i--)
     {
         for (int j = 0; j < nx; j++)
         {
-
-            double x = nx * xstep + xmin;
-            double y = ny * ystep + ymin;
+            double x = j * xstep + xmin;
+            double y = i * ystep + ymin;
             outTH2D->Fill(x, y, data[numDataCount]);
             numDataCount++;
+            // cout << "x: " << x << ", y: " << y << ", val: " << data[numDataCount - 1] << endl;
         }
     }
 
