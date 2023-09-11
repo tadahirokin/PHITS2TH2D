@@ -13,6 +13,13 @@ using namespace std;
 TH2D *outTH2D;
 TCanvas *c1;
 
+string Blanks2Blank(string str)
+{
+    std::regex pattern("\\s+");
+    str = std::regex_replace(str, pattern, " ");
+    return str;
+}
+
 int CountSkipLines(const char *filename)
 {
     int skipLineNum = 0;
@@ -84,11 +91,7 @@ void PHITS2TH2D()
     }
 
     getline(file, dummy);
-
-    std::regex pattern("\\s+");
-
-    cout << dummy << endl;
-    dummy = std::regex_replace(dummy, pattern, " "); // Merge blanks (because the delimiter is the blank)
+    dummy = Blanks2Blank(dummy);
 
     vector<string> lineSeparated = SplitString(dummy, ' ');
 
@@ -118,17 +121,45 @@ void PHITS2TH2D()
 
     cout << "ny = " << ny << ", nx = " << nx << endl;
 
-    outTH2D = new TH2D(nx, xmin, xmax, ny, ymin, ymax);
+    int totalDataNum = ny * nx;
+    int totalLineNum = (int)(totalDataNum / 10); // PHITS output has 10 data in a single line.
 
+    outTH2D = new TH2D("outHist", "outHist", nx, xmin, xmax, ny, ymin, ymax);
+
+    int numDataCount = 0;
+    double data[totalDataNum];
+    for (int i = 0; i < totalLineNum; i++)
+    {
+        getline(file, dummy);
+        dummy = Blanks2Blank(dummy);
+        istringstream iss(dummy);
+
+        for (int j = 0; j < 10; j++)
+        {
+            double datum;
+            if (iss >> datum)
+            {
+                cout << datum << ", ";
+
+                data[numDataCount] = datum;
+                numDataCount++;
+            }
+        }
+    }
+
+    numDataCount = 0;
     for (int i = 0; i < ny; i++)
     {
         for (int j = 0; j < nx; j++)
         {
+
             double x = nx * xstep + xmin;
             double y = ny * ystep + ymin;
-            double temp;
-            file >> temp;
-            outTH2D.Fill(x, y, temp);
+            outTH2D->Fill(x, y, data[numDataCount]);
+            numDataCount++;
         }
     }
+
+    c1 = new TCanvas("c1", "c1", 800, 600);
+    outTH2D->Draw("colz");
 }

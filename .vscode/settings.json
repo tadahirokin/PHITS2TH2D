@@ -1,5 +1,6 @@
 {
   "files.associations": {
-    "CBAnalysis_KU.C": "cpp"
+    "CBAnalysis_KU.C": "cpp",
+    "iosfwd": "cpp"
   }
 }
