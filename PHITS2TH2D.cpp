@@ -58,6 +58,12 @@ vector<std::string> SplitString(const string &input, char delimiter)
     return tokens;
 }
 
+void HistoDef()
+{
+    char hName[40];
+    char hTitle[40];
+}
+
 void PHITS2TH2D()
 {
     int skipLineNum = CountSkipLines(FILENAME);
@@ -82,7 +88,7 @@ void PHITS2TH2D()
     std::regex pattern("\\s+");
 
     cout << dummy << endl;
-    dummy = std::regex_replace(dummy, pattern, " ");
+    dummy = std::regex_replace(dummy, pattern, " "); // Merge blanks (because the delimiter is the blank)
 
     vector<string> lineSeparated = SplitString(dummy, ' ');
 
@@ -91,14 +97,38 @@ void PHITS2TH2D()
     double ymax = stod(lineSeparated[3]);
     double ymin = stod(lineSeparated[5]);
     double ystep = stod(lineSeparated[7]);
+    if (ymax < ymin)
+    {
+        double temp = ymax;
+        ymax = ymin;
+        ymin = temp;
+    }
     int ny = (int)((ymax - ymin) / ystep);
 
-    double xmax = stod(lineSeparated[3]);
-    double xmin = stod(lineSeparated[5]);
-    double ystep = stod(lineSeparated[7]);
-    int nx = (int)((xmax - xml::
-                        : in) /
-                   ystep);
+    double xmin = stod(lineSeparated[11]);
+    double xmax = stod(lineSeparated[13]);
+    double xstep = stod(lineSeparated[15]);
+    if (xmax < xmin)
+    {
+        double temp = xmax;
+        xmax = xmin;
+        xmin = temp;
+    }
+    int nx = (int)((xmax - xmin) / xstep);
 
-    cout << "ny = " << ny << endl;
+    cout << "ny = " << ny << ", nx = " << nx << endl;
+
+    outTH2D = new TH2D(nx, xmin, xmax, ny, ymin, ymax);
+
+    for (int i = 0; i < ny; i++)
+    {
+        for (int j = 0; j < nx; j++)
+        {
+            double x = nx * xstep + xmin;
+            double y = ny * ystep + ymin;
+            double temp;
+            file >> temp;
+            outTH2D.Fill(x, y, temp);
+        }
+    }
 }
