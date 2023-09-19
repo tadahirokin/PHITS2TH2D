@@ -75,6 +75,7 @@ void PHITS2TH2D()
 {
     TFile *outFile = new TFile("output.root", "recreate");
     TTree *tree = new TTree("tree", "tree");
+    tree->Branch("outTH2D", &outTH2D);
 
     int skipLineNum = CountSkipLines(FILENAME);
 
@@ -163,7 +164,11 @@ void PHITS2TH2D()
         }
     }
 
+    tree->Fill();
+    outFile->Write();
+
     c1 = new TCanvas("c1", "c1", 800, 600);
     outTH2D->Draw("colz");
-    tree->Write();
+
+    // outFile->Close();
 }
