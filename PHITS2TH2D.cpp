@@ -165,4 +165,5 @@ void PHITS2TH2D()
 
     c1 = new TCanvas("c1", "c1", 800, 600);
     outTH2D->Draw("colz");
+    tree->Write();
 }
