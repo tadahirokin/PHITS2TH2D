@@ -73,6 +73,9 @@ void HistoDef()
 
 void PHITS2TH2D()
 {
+    TFile *outFile = new TFile("output.root", "recreate");
+    TTree *tree = new TTree("tree", "tree");
+
     int skipLineNum = CountSkipLines(FILENAME);
 
     std::ifstream file(FILENAME);
